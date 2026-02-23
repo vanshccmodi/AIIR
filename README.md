@@ -6,6 +6,8 @@ A comprehensive collection of Apache Airflow DAGs and configurations developed t
 
 This project serves as a structured learning journey into the world of **Apache Airflow**. From foundational concepts like DAG definition and scheduling to advanced topics like XCom data sharing, task parallelism, and incremental loading, this repository documents the evolution of my data engineering skills.
 
+🎨 **Visual Learner?** Check out my [Airflow Theory Notes (SVG)](./Airflow_Notes.svg) for a structured breakdown of the concepts I've mastered.
+
 ## 🧠 What I Learnt
 
 Through this project, I have mastered the following core concepts:
