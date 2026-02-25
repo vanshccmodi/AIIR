@@ -1,0 +1,1156 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MLOps Strategy | Smart Pump System</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            /* Claymorphism works best on light pastel/slate backgrounds */
+            --bg-main: #e2e8f0;
+            --bg-sidebar: #e2e8f0;
+            --text-main: #334155;
+            --text-muted: #64748b;
+            --accent-primary: #3b82f6;
+            --accent-success: #10b981;
+            --accent-warning: #f59e0b;
+            --accent-danger: #ef4444;
+            --border-color: #cbd5e1;
+
+            /* Clay Shadows */
+            --clay-out: 8px 8px 16px #c3cbd5, -8px -8px 16px #ffffff;
+            --clay-in: inset 6px 6px 12px #c3cbd5, inset -6px -6px 12px #ffffff;
+
+            /* The classic 'Puffy' Clay form */
+            --clay-card:
+                inset 2px 2px 5px rgba(255, 255, 255, 0.8),
+                inset -3px -3px 7px rgba(163, 177, 198, 0.3),
+                10px 10px 20px rgba(163, 177, 198, 0.5),
+                -10px -10px 20px rgba(255, 255, 255, 0.9);
+
+            --clay-radius: 28px;
+            --clay-radius-sm: 16px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Sidebar Styling */
+        .sidebar {
+            width: 330px;
+            background-color: var(--bg-sidebar);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            position: relative;
+            z-index: 10;
+            box-shadow: 10px 0 20px rgba(163, 177, 198, 0.3);
+            border-right: 2px solid #ffffff;
+        }
+
+        .sidebar-header {
+            padding: 35px 25px;
+            text-align: center;
+        }
+
+        .sidebar-header h1 {
+            font-size: 1.3rem;
+            font-weight: 800;
+            margin-bottom: 10px;
+            color: var(--accent-primary);
+        }
+
+        .sidebar-header p {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .nav-links {
+            padding: 0 20px 20px 20px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .nav-link {
+            display: block;
+            padding: 14px 20px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 600;
+            border-radius: var(--clay-radius-sm);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: var(--clay-out);
+            border: 2px solid transparent;
+            cursor: pointer;
+        }
+
+        .nav-link:hover {
+            color: var(--text-main);
+            transform: translateY(-2px);
+        }
+
+        .nav-link.active,
+        .nav-link:active {
+            color: var(--accent-primary);
+            box-shadow: var(--clay-in);
+            border: 2px solid rgba(255, 255, 255, 0.5);
+        }
+
+        /* Main Content Styling */
+        .main-content {
+            flex-grow: 1;
+            overflow-y: auto;
+            scroll-behavior: smooth;
+            position: relative;
+            padding: 20px;
+        }
+
+        .section-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px;
+            display: none;
+            animation: fadeIn 0.4s ease forwards;
+        }
+
+        .section-container.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.97);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        h2 {
+            font-size: 2.2rem;
+            margin-bottom: 35px;
+            font-weight: 800;
+            color: var(--text-main);
+            text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.8);
+            border-bottom: 3px solid rgba(255, 255, 255, 0.5);
+            padding-bottom: 10px;
+        }
+
+        h3 {
+            font-size: 1.4rem;
+            margin: 40px 0 20px 0;
+            color: var(--accent-primary);
+            font-weight: 700;
+            text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8);
+        }
+
+        h4 {
+            font-size: 1.1rem;
+            margin: 25px 0 15px 0;
+            color: var(--text-main);
+        }
+
+        p {
+            margin-bottom: 20px;
+            color: var(--text-main);
+            font-size: 1.05rem;
+            font-weight: 500;
+        }
+
+        /* Claymorphism Cards */
+        .card {
+            background-color: var(--bg-main);
+            border-radius: var(--clay-radius);
+            padding: 35px;
+            margin-bottom: 40px;
+            box-shadow: var(--clay-card);
+            border: 2px solid rgba(255, 255, 255, 0.6);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+        }
+
+        .callout {
+            border-radius: var(--clay-radius);
+            box-shadow: var(--clay-card);
+            background-color: var(--bg-main);
+            padding: 25px 30px;
+            margin: 30px 0;
+            font-style: italic;
+            color: var(--text-main);
+            border-left: 8px solid var(--accent-primary);
+        }
+
+        /* Tables styling in Clay */
+        .table-responsive {
+            overflow-x: auto;
+            margin: 35px 0;
+            border-radius: var(--clay-radius);
+            box-shadow: var(--clay-out);
+            border: 2px solid rgba(255, 255, 255, 0.6);
+            background-color: var(--bg-main);
+            padding: 15px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+        th,
+        td {
+            padding: 18px 20px;
+            text-align: left;
+        }
+
+        th {
+            font-weight: 800;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            border-bottom: 3px solid rgba(255, 255, 255, 0.8);
+        }
+
+        tr td {
+            border-bottom: 2px solid rgba(255, 255, 255, 0.4);
+            font-weight: 500;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Code Blocks - Sunken into clay */
+        pre {
+            background-color: var(--bg-main);
+            box-shadow: var(--clay-in);
+            padding: 25px;
+            border-radius: var(--clay-radius-sm);
+            overflow-x: auto;
+            margin: 25px 0;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+        }
+
+        code {
+            font-family: 'Fira Code', monospace;
+            font-size: 0.9rem;
+            color: #4f46e5;
+            font-weight: 600;
+        }
+
+        .inline-code {
+            box-shadow: var(--clay-in);
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.85em;
+            color: #d97706;
+            font-weight: 700;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+        }
+
+        /* Status badges */
+        .badge {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            box-shadow: var(--clay-out);
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            background-color: var(--bg-main);
+        }
+
+        .badge-mine {
+            color: var(--accent-success);
+        }
+
+        .badge-not-mine {
+            color: var(--accent-danger);
+        }
+
+        .badge-pending {
+            color: var(--accent-warning);
+        }
+
+        .mission-box {
+            background-color: var(--bg-main);
+            border-radius: var(--clay-radius);
+            text-align: center;
+            padding: 50px;
+            margin-top: 60px;
+            box-shadow: var(--clay-card);
+            border: 3px solid rgba(255, 255, 255, 0.8);
+            position: relative;
+        }
+
+        .mission-box h3 {
+            margin-top: 0;
+            color: var(--accent-primary);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 800;
+        }
+
+        .mission-box blockquote {
+            font-size: 1.4rem;
+            line-height: 1.6;
+            color: var(--text-main);
+            font-weight: 700;
+            font-style: italic;
+        }
+
+        .tool-badges {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+
+        .tool-badge {
+            padding: 12px 20px;
+            border-radius: var(--clay-radius-sm);
+            font-size: 0.9rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: var(--clay-out);
+            border: 2px solid rgba(255, 255, 255, 0.6);
+            background-color: var(--bg-main);
+        }
+
+        .mermaid-container {
+            background: var(--bg-main);
+            border-radius: var(--clay-radius);
+            padding: 30px;
+            margin: 30px 0;
+            overflow-x: auto;
+            box-shadow: var(--clay-in);
+            border: 2px solid rgba(255, 255, 255, 0.5);
+        }
+
+        ::-webkit-scrollbar {
+            width: 14px;
+            height: 14px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-main);
+            box-shadow: var(--clay-in);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 10px;
+            border: 3px solid var(--bg-main);
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Sidebar Navigation -->
+    <nav class="sidebar">
+        <div class="sidebar-header">
+            <h1>⚙️ MLOps Strategy</h1>
+            <p>Smart Pump System</p>
+            <p style="margin-top: 10px; font-size: 0.75rem;">Role: MLOps Engineer</p>
+        </div>
+        <div class="nav-links">
+            <a class="nav-link active" onclick="showSection('intro')">Dashboard & Tools</a>
+            <a class="nav-link" onclick="showSection('role')">1. Role & Boundaries</a>
+            <a class="nav-link" onclick="showSection('arch')">2. Architecture Overview</a>
+            <a class="nav-link" onclick="showSection('airflow')">3. Airflow Strategy</a>
+            <a class="nav-link" onclick="showSection('mlflow')">4. MLflow Strategy</a>
+            <a class="nav-link" onclick="showSection('docker')">5. Docker Strategy</a>
+            <a class="nav-link" onclick="showSection('cicd')">6. CI/CD Strategy</a>
+            <a class="nav-link" onclick="showSection('governance')">7. Model Governance</a>
+            <a class="nav-link" onclick="showSection('monitor')">8. Monitoring</a>
+            <a class="nav-link" onclick="showSection('rollback')">9. Rollback & Recovery</a>
+            <a class="nav-link" onclick="showSection('ownership')">10. Ownership Matrix</a>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+
+        <!-- Intro Section -->
+        <section id="intro" class="section-container active">
+            <h2>MLOps Strategy Overview</h2>
+            <div class="card">
+                <p>Welcome to the MLOps Strategy presentation for the Smart Pump Monitoring & Optimization System.</p>
+                <div class="tool-badges">
+                    <div class="tool-badge" style="border-color: #017CEE;">
+                        <span style="color: #017CEE">🟦</span> Apache Airflow
+                    </div>
+                    <div class="tool-badge" style="border-color: #0194E2;">
+                        <span style="color: #0194E2">🔵</span> MLflow
+                    </div>
+                    <div class="tool-badge" style="border-color: #2496ED;">
+                        <span style="color: #2496ED">🐋</span> Docker
+                    </div>
+                    <div class="tool-badge" style="border-color: #2088FF;">
+                        <span style="color: #2088FF">🐙</span> GitHub Actions
+                    </div>
+                </div>
+            </div>
+
+            <h3>Why These Four Tools?</h3>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Tool</th>
+                            <th>Why I Chose It</th>
+                            <th>What It Solves</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Apache Airflow</strong></td>
+                            <td>Industry-standard for ML workflow orchestration. Native Python. DAG-based dependencies.
+                            </td>
+                            <td>Eliminates manual retraining. Handles retries, failure alerting, scheduling.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>MLflow</strong></td>
+                            <td>Lightweight, self-hosted, no cloud dependency. Integrates with any Python ML library.
+                            </td>
+                            <td>Tracks every experiment, versions every model, enforces promotion gates.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Docker</strong></td>
+                            <td>Ensures every environment — dev, staging, production — is identical.</td>
+                            <td>Prevents "works on my machine" failures. Easy to redeploy anywhere.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>GitHub Actions</strong></td>
+                            <td>Already in the code hosting platform. Free for standard workflows.</td>
+                            <td>Automates testing before any code lands in production.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="card">
+                <h3>Deliberately Not Using</h3>
+                <div class="table-responsive" style="margin: 0; box-shadow: none;">
+                    <table>
+                        <tbody>
+                            <tr>
+                                <td><strong style="color: #f87171;">DVC</strong></td>
+                                <td>MLflow already handles data + model versioning for this scale.</td>
+                            </tr>
+                            <tr>
+                                <td><strong style="color: #f87171;">Kubeflow</strong></td>
+                                <td>Kubernetes is overkill; Docker Compose is sufficient.</td>
+                            </tr>
+                            <tr>
+                                <td><strong style="color: #f87171;">SageMaker / Vertex AI</strong></td>
+                                <td>On-premises Linux server; no cloud budget.</td>
+                            </tr>
+                            <tr>
+                                <td><strong style="color: #f87171;">Weights & Biases</strong></td>
+                                <td>MLflow self-hosted covers all our tracking needs.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="mission-box">
+                <h3>🎯 Mission Statement 🎯</h3>
+                <br>
+                <blockquote>
+                    Every model trained by this team should be automatically tracked, fairly evaluated against what's
+                    already in production, and deployed only if it genuinely improves. If it doesn't improve, we stay
+                    safe. If the system breaks, we recover in under 5 minutes.
+                </blockquote>
+            </div>
+        </section>
+
+        <!-- Role Section -->
+        <section id="role" class="section-container">
+            <h2>1. My Role & Boundaries</h2>
+
+            <p>As the <strong>MLOps Engineer</strong>, my responsibility is to build and maintain the
+                <strong>infrastructure that makes the ML system reliable, reproducible, and continuously
+                    improving</strong> over time.
+            </p>
+
+            <div class="callout">
+                I do <strong>not</strong> own the data ingestion, sensor logic, PLC integration, dashboards, or alert
+                rules.<br><br>
+                My job is to make sure <strong>any model trained by this team can be tracked, versioned, deployed, and
+                    automatically retrained — without manual effort.</strong>
+            </div>
+
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Responsibility</th>
+                            <th>My Deliverable</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Orchestration</strong></td>
+                            <td>Airflow DAGs for all ML workflows</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Experiment Tracking</strong></td>
+                            <td>MLflow setup, logging standards, model registry</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Containerization</strong></td>
+                            <td>Docker Compose stack for all services</td>
+                        </tr>
+                        <tr>
+                            <td><strong>CI/CD</strong></td>
+                            <td>GitHub Actions pipelines for testing and deployment</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Model Governance</strong></td>
+                            <td>Promotion rules, versioning policy, rollback procedures</td>
+                        </tr>
+                        <tr>
+                            <td><strong>ML System Health</strong></td>
+                            <td>Monitoring drift, retraining triggers, performance degradation</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Architecture Section -->
+        <section id="arch" class="section-container">
+            <h2>2. MLOps Architecture Overview</h2>
+
+            <p>A visual representation of the boundaries and data logic within the MLOps scope.</p>
+
+            <div class="card">
+                <div class="mermaid">
+                    graph TD
+                    classDef scope fill:#1e293b,stroke:#3b82f6,stroke-width:2px,color:#f8fafc;
+                    classDef tool fill:#f1f5f9,stroke:#64748b,stroke-width:1px,color:#1e293b;
+                    classDef decision fill:#fee2e2,stroke:#ef4444,stroke-width:1px,color:#991b1b;
+
+                    MLOps["<span style='color:#ffffff; font-weight:600;'>MLOps Layer (My Scope)</span>"]:::scope
+
+                    Orchestration["<b>&nbsp;Orchestration (Apache Airflow)&nbsp;</b><br />- DAG design<br />-
+                    Schedules<br />- Retries<br />- Alerts"]:::tool
+                    Registry["<b>&nbsp;Experiment & Model Registry (MLflow)&nbsp;</b><br />- Run logging<br />-
+                    Versioning<br />- Registry<br />- Promotion"]:::tool
+                    Container["<b>&nbsp;Containerization & CI/CD&nbsp;</b><br />- Docker Services<br />- Lint &
+                    Test<br />- GitHub Actions deploy"]:::tool
+
+                    MLOps --> Orchestration
+                    MLOps --> Registry
+                    MLOps --> Container
+
+                    Opt["<b>Optimization Execution</b><br /><i>Decided by another team member.</i><br />I will implement
+                    the infrastructure for whichever approach is chosen."]:::decision
+
+                    Orchestration --> Opt
+                    Registry --> Opt
+                    Container --> Opt
+                </div>
+            </div>
+        </section>
+
+        <!-- Airflow Section -->
+        <section id="airflow" class="section-container">
+            <h2>3. Airflow — Orchestration Strategy</h2>
+
+            <h3>My DAG Design Plan</h3>
+            <p>I will build and maintain <strong>4 core DAGs</strong>:</p>
+
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>DAG</th>
+                            <th>Schedule</th>
+                            <th>What It Does</th>
+                            <th>Why This Schedule</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="inline-code">weekly_retrain_dag</span></td>
+                            <td>Every Sunday at 02:00</td>
+                            <td>Full model retrain + evaluation + conditional promotion</td>
+                            <td><strong>Sunday</strong> = least operationally busy day. <strong>02:00 AM</strong> = dead
+                                zone. Model ready before Monday.</td>
+                        </tr>
+                        <tr>
+                            <td><span class="inline-code">data_quality_dag</span></td>
+                            <td>Daily at 00:30</td>
+                            <td>Validates data freshness and completeness before training</td>
+                            <td><strong>Daily</strong> = catches bad data early. Runs before 02:00 retrain.</td>
+                        </tr>
+                        <tr>
+                            <td><span class="inline-code">alert_sweep_dag</span></td>
+                            <td>Every 5 minutes</td>
+                            <td>Scans <span class="inline-code">readings_wide</span> flag columns, writes to <span
+                                    class="inline-code">alerts_log</span></td>
+                            <td>5 min is the minimum sustained-condition window that covers all alert rules without
+                                spamming logs.</td>
+                        </tr>
+                        <tr>
+                            <td><span class="inline-code">model_validation_dag</span></td>
+                            <td>Triggered by retrain DAG</td>
+                            <td>Compares challenger vs. production model; decides promotion</td>
+                            <td><strong>Event-triggered</strong> = must only run after a fresh retrain.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3>weekly_retrain_dag Flow</h3>
+            <div class="card">
+                <div class="mermaid">
+                    graph TD
+                    classDef task fill:#e0f2fe,stroke:#0284c7,stroke-width:1px,color:#0c4a6e;
+                    classDef eval fill:#ffedd5,stroke:#c2410c,stroke-width:1px,color:#7c2d12;
+
+                    Start(["&nbsp;Trigger: Sunday 02:00&nbsp;"]) --> ext["&nbsp;task_1: data_extraction&nbsp;"]:::task
+                    ext --> val["&nbsp;task_2: data_validation&nbsp;"]:::task
+                    val --> feat["&nbsp;task_3: feature_engineering&nbsp;"]:::task
+
+                    feat --> train["&nbsp;task_4: train_model&nbsp;<br />Algorithm decided by ML Engineer<br />Log
+                    params & metrics to MLflow"]:::task
+
+                    train --> comp["&nbsp;task_5: compare_vs_production&nbsp;"]:::eval
+
+                    comp -->|BETTER RMSE| prom["&nbsp;task_6a: promote_model&nbsp;<br />to Production"]:::task
+                    comp -->|NOT BETTER| arch["&nbsp;task_6b: archive_run&nbsp;<br />to Staging only"]:::task
+                </div>
+            </div>
+
+            <h3>Airflow Engineering Decisions</h3>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Decision</th>
+                            <th>Choice</th>
+                            <th>Reasoning</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Executor</strong></td>
+                            <td><span class="inline-code">LocalExecutor</span></td>
+                            <td>Sufficient for our workload; no need for Celery/Kubernetes.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Retry policy</strong></td>
+                            <td>2 retries, 5 min delay</td>
+                            <td>Handles transient DB/network issues without spamming alerts.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Failure alerting</strong></td>
+                            <td>Email on DAG failure</td>
+                            <td>Immediate notification to team on broken retraining.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Backfill</strong></td>
+                            <td>Disabled for retrain DAG</td>
+                            <td>Retraining with stale triggers is not meaningful.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Data skip guard</strong></td>
+                            <td><span class="inline-code">AirflowSkipException</span></td>
+                            <td>Prevents training on bad data silently.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- MLflow Section -->
+        <section id="mlflow" class="section-container">
+            <h2>4. MLflow — Experiment & Model Strategy</h2>
+
+            <h3>Experiment Structure</h3>
+            <p>I will organize MLflow into <strong>2 experiments</strong> — one per model purpose.</p>
+            <div class="callout">
+                ⚠️ <strong>Note</strong>: The specific algorithm for each model is the <strong>ML Engineer's decision,
+                    not mine</strong>. My job is to build tracking infrastructure that works regardless of the chosen
+                algorithm.
+            </div>
+
+            <pre><code>MLflow Experiments
+│
+├── 📁 tank_forecasting_model
+│     Every Sunday retrain = 1 run
+│     Params: [decided by ML Engineer — logged as-is]
+│     Metrics: rmse_val, mae_val, rmse_train
+│     Artifacts: model.pkl, forecast_plot.png
+│
+└── 📁 pump_efficiency_model
+      Every Sunday retrain = 1 run
+      Params: [decided by ML Engineer — logged as-is]
+      Metrics: rmse_val, mae_val, r2_score
+      Artifacts: model.pkl, feature_importance.png</code></pre>
+
+            <h3>Recommended Professional Setup</h3>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Component</th>
+                            <th>Cadence</th>
+                            <th>Reasoning</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>🔮 <strong>Forecast Model</strong></td>
+                            <td>Weekly retrain</td>
+                            <td>Demand patterns at a pump station are stable and seasonal. Weekly is sufficient.</td>
+                        </tr>
+                        <tr>
+                            <td>⚡ <strong>Efficiency Model</strong></td>
+                            <td>Weekly retrain</td>
+                            <td>Pump degradation is gradual. Weekly retraining captures the trend.</td>
+                        </tr>
+                        <tr>
+                            <td>📡 <strong>Drift Monitoring</strong></td>
+                            <td>Daily check</td>
+                            <td>Abnormal sensor behaviour can appear any day. Daily catches this early.</td>
+                        </tr>
+                        <tr>
+                            <td>📊 <strong>Predictions / Output</strong></td>
+                            <td>Hourly / per-minute</td>
+                            <td>Operational usage — depends on optimization approach decided by team.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3>Logging Standards Enforced via mlops_utils.py</h3>
+            <pre><code>mlflow.log_param("model_type", ...)  # e.g. "forecasting" or "efficiency"
+mlflow.log_param("training_days", 30)
+mlflow.log_param("training_date", ...)
+
+mlflow.log_metric("rmse_val", ...)
+mlflow.log_metric("mae_val", ...)
+
+mlflow.log_artifact("model.pkl")
+mlflow.set_tag("promoted", "false")
+mlflow.set_tag("data_start", ...)</code></pre>
+
+            <h3>Promotion Gate Rules</h3>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Rule</th>
+                            <th>Threshold</th>
+                            <th>Action if Failed</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Validation RMSE must improve</td>
+                            <td>New RMSE < Prod RMSE − 2%</td>
+                            <td>Reject promotion, stay on current prod</td>
+                        </tr>
+                        <tr>
+                            <td>No NaN in predictions (holdout)</td>
+                            <td>0 NaN allowed</td>
+                            <td>Hard reject, flag for investigation</td>
+                        </tr>
+                        <tr>
+                            <td>Training data volume</td>
+                            <td>min 36,000 rows</td>
+                            <td>Skip training, alert team</td>
+                        </tr>
+                        <tr>
+                            <td>Run time limit</td>
+                            <td>
+                                < 30 min wall clock</td>
+                            <td>Timeout, fail DAG</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Docker Section -->
+        <section id="docker" class="section-container">
+            <h2>5. Docker — Deployment Strategy</h2>
+
+            <h3>Containerized Services</h3>
+            <p>The <span class="inline-code">docker-compose.yaml</span> manages these 4 core services:</p>
+            <pre><code>services:
+  postgres:          # Shared DB — not my data design, but I host it
+    image: postgres:15
+    port: 5432
+
+  airflow-webserver: # DAG UI and API
+    build: ./airflow
+    port: 8080
+
+  airflow-scheduler: # DAG execution engine
+    build: ./airflow
+
+  mlflow:            # Experiment tracking UI + model registry
+    build: ./mlflow
+    port: 5000
+    volumes:
+      - ./mlruns:/mlruns    # Persisted locally</code></pre>
+
+            <div class="callout">
+                Streamlit interface and optimization layers are owned by other members. I provide the postgres and
+                mlflow services as dependencies they consume.
+            </div>
+
+            <h3>Volume & Persistence Strategy</h3>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Persistence Method</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>PostgreSQL data</td>
+                            <td>Named Docker volume — survives container restarts</td>
+                        </tr>
+                        <tr>
+                            <td>MLflow run data</td>
+                            <td>Bind mount <span class="inline-code">./mlruns</span> to host filesystem</td>
+                        </tr>
+                        <tr>
+                            <td>Airflow logs</td>
+                            <td>Bind mount <span class="inline-code">./logs</span> to host filesystem</td>
+                        </tr>
+                        <tr>
+                            <td>Airflow DAGs</td>
+                            <td>Bind mount <span class="inline-code">./dags</span> — live sync without restart</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- CI/CD Section -->
+        <section id="cicd" class="section-container">
+            <h2>6. GitHub Actions — CI/CD Strategy</h2>
+
+            <div class="card" style="border-left: 4px solid var(--accent-warning);">
+                <h3 style="margin-top:0; color:var(--text-main);">⚠️ Not Yet Decided</h3>
+                <p>The CI/CD tooling, pipeline structure, and deployment approach will be defined once the team
+                    finalizes the development workflow.</p>
+                <p style="margin-bottom:0;">My responsibility will be to set up and maintain whatever CI/CD pipeline is
+                    agreed upon — covering code quality checks, testing, and automated deployment to the Linux server.
+                </p>
+            </div>
+        </section>
+
+        <!-- Governance Section -->
+        <section id="governance" class="section-container">
+            <h2>7. Model Governance Strategy</h2>
+
+            <div class="mission-box" style="padding:20px; margin: 20px 0;">
+                <h3 style="margin-bottom:10px;">The Core Question Answered Every Week</h3>
+                <p style="font-size: 1.2rem; font-style:italic;">"Is the model we're using in production still the best
+                    one available?"</p>
+            </div>
+
+            <h3>Governance Policy</h3>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Policy</th>
+                            <th>Rule</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>One production model at a time</strong></td>
+                            <td>Only one version of each model type lives in <span class="inline-code">Production</span>
+                                stage.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Never delete runs</strong></td>
+                            <td>All MLflow runs are archived, never deleted — full audit trail.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Promotion requires validation</strong></td>
+                            <td>No model goes to Production without passing the validation DAG.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>A/B testing not required</strong></td>
+                            <td>System is advisory; champion/challenger swaps are instantaneous.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Rollback is one command</strong></td>
+                            <td><span class="inline-code">mlflow models transition-stage</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3>Performance Tracking Table (<span class="inline-code">model_performance</span>)</h3>
+            <p>Every week, I populate this Postgres table which the Streamlit team consumes for visualizations:</p>
+            <div style="display:flex; gap: 10px; flex-wrap: wrap;">
+                <span class="inline-code">run_id</span>
+                <span class="inline-code">model_type</span>
+                <span class="inline-code">rmse_val</span>
+                <span class="inline-code">mae_val</span>
+                <span class="inline-code">promoted (0/1)</span>
+                <span class="inline-code">training_date</span>
+            </div>
+        </section>
+
+        <!-- Monitoring Section -->
+        <section id="monitor" class="section-container">
+            <h2>8. Monitoring the ML System Itself</h2>
+
+            <p>The rest of the team monitors the pump. <strong>I monitor the ML system.</strong></p>
+
+            <h3>What I Watch & Alert On</h3>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Signal</th>
+                            <th>How I Detect It</th>
+                            <th>Action / Alert</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Model performance drift</strong></td>
+                            <td>Weekly RMSE trend in DB</td>
+                            <td>Alert if RMSE rises >15% week-over-week</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Data volume drop</strong></td>
+                            <td>Row count check in DAG</td>
+                            <td>Skip training + Email alert</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Retraining failure</strong></td>
+                            <td>Airflow DAG failure notification</td>
+                            <td>Investigate + manual trigger if needed</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Serving/output outage</strong></td>
+                            <td>Missing rows in predictions table</td>
+                            <td>Alert responsible team member</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Stale production model</strong></td>
+                            <td>Age check (> 14 days)</td>
+                            <td>Auto-trigger unscheduled retrain</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Rollback Section -->
+        <section id="rollback" class="section-container">
+            <h2>9. Rollback & Recovery Plan</h2>
+
+            <div class="card">
+                <h3>Scenario: Bad Model Promoted</h3>
+                <p><strong>Total recovery time: < 5 minutes.</strong>
+                </p>
+                <ol style="margin-left: 20px; line-height: 2;">
+                    <li><strong>Detection:</strong> RMSE spike in DB OR dashboard team reports bad predictions.</li>
+                    <li><strong>Step 1:</strong> Identify the previous Production <span
+                            class="inline-code">run_id</span> in MLflow.</li>
+                    <li><strong>Step 2:</strong> Run <span class="inline-code">mlflow models transition-stage</span> to
+                        push old version to Production.</li>
+                    <li><strong>Step 3:</strong> Serving layer picks up new Prod model on next scheduled run.</li>
+                    <li><strong>Step 4:</strong> Demote the bad model to Archived stage.</li>
+                </ol>
+            </div>
+
+            <div class="card">
+                <h3>Scenario: Airflow Scheduler Down</h3>
+                <pre><code>docker-compose restart airflow-scheduler
+
+# If data corruption:
+docker-compose down
+docker-compose up -d
+# DAG state is stored in Postgres — recovers automatically</code></pre>
+            </div>
+
+            <div class="card">
+                <h3>Scenario: MLflow Server Down</h3>
+                <pre><code>docker-compose restart mlflow
+
+# MLflow data is bind-mounted → no data loss on restart.
+# Impact on the serving layer depends on the execution approach 
+# decided by the responsible team member.</code></pre>
+            </div>
+        </section>
+
+        <!-- Ownership Section -->
+        <section id="ownership" class="section-container">
+            <h2>10. What I Own vs What I Consume</h2>
+
+            <p>Clear boundaries prevent duplicate work and system conflicts:</p>
+
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>System Component</th>
+                            <th>Status</th>
+                            <th>Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Airflow DAGs</td>
+                            <td><span class="badge badge-mine">✅ 100% Mine</span></td>
+                            <td>Full creation and monitoring</td>
+                        </tr>
+                        <tr>
+                            <td>MLflow Server & Registry</td>
+                            <td><span class="badge badge-mine">✅ 100% Mine</span></td>
+                            <td>Infrastructure + promotion rules</td>
+                        </tr>
+                        <tr>
+                            <td>Docker Compose Stack</td>
+                            <td><span class="badge badge-mine">✅ 100% Mine</span></td>
+                            <td>Base platform setup</td>
+                        </tr>
+                        <tr>
+                            <td>Infrastructure for Optimization</td>
+                            <td><span class="badge badge-mine">✅ Mine (Once Confirmed)</span></td>
+                            <td>I set it up once the approach is decided</td>
+                        </tr>
+                        <tr>
+                            <td><span class="inline-code">model_performance</span> table</td>
+                            <td><span class="badge badge-mine">✅ I Populate It</span></td>
+                            <td>Written from MLflow pipeline</td>
+                        </tr>
+                        <tr>
+                            <td>Optimization Execution Approach</td>
+                            <td><span class="badge badge-not-mine">❌ Not Mine</span></td>
+                            <td>Decided by responsible team member</td>
+                        </tr>
+                        <tr>
+                            <td>Training Algorithms</td>
+                            <td><span class="badge badge-not-mine">❌ Not Mine</span></td>
+                            <td>Written by ML Engineer</td>
+                        </tr>
+                        <tr>
+                            <td><span class="inline-code">readings_wide</span> table</td>
+                            <td><span class="badge badge-not-mine">❌ Not Mine</span></td>
+                            <td>I consume from Data Eng</td>
+                        </tr>
+                        <tr>
+                            <td>Streamlit Dashboard</td>
+                            <td><span class="badge badge-not-mine">❌ Not Mine</span></td>
+                            <td>Dashboard Team</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        // Mermaid Initialization
+        mermaid.initialize({
+            startOnLoad: false, // Prevents elements in display:none from rendering as 0x0
+            theme: 'base',
+            themeVariables: {
+                fontFamily: '"Inter", sans-serif',
+                primaryColor: '#f1f5f9',
+                primaryTextColor: '#334155',
+                primaryBorderColor: '#cbd5e1',
+                lineColor: '#64748b',
+                secondaryColor: '#e2e8f0',
+                tertiaryColor: '#f8fafc'
+            },
+            flowchart: {
+                padding: 20
+            }
+        });
+
+        // Navigation Logic
+        function showSection(sectionId) {
+            // Hide all sections
+            document.querySelectorAll('.section-container').forEach(sec => {
+                sec.classList.remove('active');
+            });
+
+            // Show target section
+            document.getElementById(sectionId).classList.add('active');
+
+            // Update active state on nav links
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('onclick').includes(sectionId)) {
+                    link.classList.add('active');
+                }
+            });
+
+            // Run mermaid dynamically for the shown section
+            setTimeout(async () => {
+                const nodes = document.querySelectorAll("#" + sectionId + " .mermaid");
+                if (nodes.length > 0) {
+                    try {
+                        await mermaid.run({ nodes: Array.from(nodes) });
+                    } catch (e) {
+                        console.error("Mermaid error:", e);
+                    }
+                }
+            }, 50);
+        }
+    </script>
+</body>
+
+</html>
