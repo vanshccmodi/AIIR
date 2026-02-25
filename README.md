@@ -59,18 +59,34 @@ The environment is powered by **Docker Compose**, running a multi-container stac
 *   **Webserver**: The Flask-based UI for monitoring and manual triggering.
 *   **Scheduler**: The heart of Airflow that monitors DAGs and triggers tasks.
 
-### Local Development
-1.  **Clone the Repository**:
+### Local Development (Setup from Scratch)
+If you are setting up Airflow for the first time using the official Docker Compose file, follow these steps:
+
+1.  **Initialize Project Directory**:
     ```bash
-    git clone https://github.com/vanshccmodi/AIIR.git
-    cd AIIR
+    mkdir airflow-docker && cd airflow-docker
     ```
-2.  **Environment Variables**: Ensure your `.env` is configured (refer to the `.env` template if provided).
-3.  **Spin up the Stack**:
+2.  **Download docker-compose.yaml**:
     ```bash
-    docker-compose up -d
+    curl -LfO 'https://airflow.apache.org/docs/apache-airflow/stable/docker-compose.yaml'
     ```
-4.  **Access the Dashboard**: Navigate to `http://localhost:8080`.
+3.  **Create Necessary Directories**:
+    ```bash
+    mkdir -p ./dags ./logs ./plugins ./config
+    ```
+4.  **Set Environment Variables**:
+    ```bash
+    echo -e "AIRFLOW_UID=$(id -u)" > .env
+    ```
+5.  **Initialize Airflow Database**:
+    ```bash
+    docker compose up airflow-init
+    ```
+6.  **Start Airflow Stack**:
+    ```bash
+    docker compose up -d
+    ```
+7.  **Access the Dashboard**: Navigate to `http://localhost:8080` (Default credentials: `airflow`/`airflow`).
 
 ---
 
