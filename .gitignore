@@ -26,3 +26,9 @@ Thumbs.db
 
 # Project specific
 *.log
+
+# MLflow
+mlflow/
+mlruns/
+mlruns.db
+.trash/
