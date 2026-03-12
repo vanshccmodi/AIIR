@@ -218,14 +218,28 @@ def etl_mlflow_postgres_pipeline():
                 "sensor_diversity": df['sensor_id'].nunique()
             })
 
-            # D. TAGGING FOR SEARCHABILITY
+            # D. TAGGING & DATASET TRACKING
             mlflow.set_tags({
                 "quality_tier": "GOLD" if health_score > 98 else "SILVER",
                 "environment": "production",
-                "data_owner": "Modi Vansh"
+                "data_owner": "Modi Vansh",
+                "source_dataset": f"postgres://{table_name}"
             })
 
-            # E. ARTIFACTS (Evidence)
+            # E. FORMAL DATASET TRACKING 
+            try:
+                # This formally logs the dataset used in the MLflow "Datasets" tab
+                dataset = mlflow.data.from_pandas(
+                    df, 
+                    source=f"{POSTGRES_CONN_URI}/{table_name}",
+                    name="sensor_raw_dataset",
+                    targets="is_anomaly"
+                )
+                mlflow.log_input(dataset, context="batch_processing")
+            except Exception as e:
+                logging.warning(f"MLflow Dataset logging skipped: {e}")
+
+            # F. ARTIFACTS (Evidence)
             # Log the Metadata JSON
             meta_path = f"/tmp/metadata_{run_date_str}.json"
             with open(meta_path, "w") as f:
